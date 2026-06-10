@@ -89,10 +89,26 @@ export default function DashboardPage() {
     alert("Bookmark created");
   };
 
-  const logout = async () => {
-    await supabase.auth.signOut();
-    router.push("/login");
-  };
+  const deleteBookmark = async (id: string) => {
+    const { error } = await supabase
+        .from("bookmarks")
+        .delete()
+        .eq("id", id);
+
+    if (error) {
+        alert(error.message);
+        return;
+    }
+
+    setBookmarks(
+        bookmarks.filter((bookmark) => bookmark.id !== id)
+    );
+    };
+
+    const logout = async () => {
+        await supabase.auth.signOut();
+        router.push("/login");
+    };
 
   return (
     <div className="max-w-3xl mx-auto p-8">
@@ -177,11 +193,20 @@ export default function DashboardPage() {
                   {bookmark.url}
                 </a>
 
-                <p className="mt-2">
-                  {bookmark.is_public
-                    ? "🌍 Public"
-                    : "🔒 Private"}
-                </p>
+               <div className="flex justify-between items-center mt-3">
+  <p>
+    {bookmark.is_public
+      ? "🌍 Public"
+      : "🔒 Private"}
+  </p>
+
+  <button
+    onClick={() => deleteBookmark(bookmark.id)}
+    className="bg-red-500 text-white px-3 py-1 rounded"
+  >
+    Delete
+  </button>
+</div>
               </div>
             ))}
           </div>

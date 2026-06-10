@@ -29,11 +29,19 @@ export default function SignupPage() {
     }
 
     if (data.user) {
-      await supabase.from("profiles").insert({
-        id: data.user.id,
-        email,
-        handle,
-      });
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .insert({
+            id: data.user.id,
+            email,
+            handle,
+        });
+
+        if (profileError) {
+        console.error(profileError);
+        alert(profileError.message);
+        return;
+        }
     }
 
     alert("Signup successful!");
