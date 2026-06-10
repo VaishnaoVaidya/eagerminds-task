@@ -105,6 +105,36 @@ export default function DashboardPage() {
     );
     };
 
+    const editBookmark = async (bookmark: Bookmark) => {
+  const newTitle = prompt("Enter new title", bookmark.title);
+  const newUrl = prompt("Enter new URL", bookmark.url);
+
+  if (!newTitle || !newUrl) return;
+
+  const { error } = await supabase
+    .from("bookmarks")
+    .update({
+      title: newTitle,
+      url: newUrl,
+    })
+    .eq("id", bookmark.id);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    await fetchBookmarks(user.id);
+  }
+
+  alert("Bookmark updated");
+};
+
     const logout = async () => {
         await supabase.auth.signOut();
         router.push("/login");
@@ -194,19 +224,28 @@ export default function DashboardPage() {
                 </a>
 
                <div className="flex justify-between items-center mt-3">
-  <p>
-    {bookmark.is_public
-      ? "🌍 Public"
-      : "🔒 Private"}
-  </p>
+                <p>
+                    {bookmark.is_public
+                    ? "🌍 Public"
+                    : "🔒 Private"}
+                </p>
 
-  <button
-    onClick={() => deleteBookmark(bookmark.id)}
-    className="bg-red-500 text-white px-3 py-1 rounded"
-  >
-    Delete
-  </button>
-</div>
+                <div className="flex gap-2">
+                    <button
+                    onClick={() => editBookmark(bookmark)}
+                    className="bg-yellow-500 text-white px-3 py-1 rounded"
+                    >
+                    Edit
+                    </button>
+
+                    <button
+                    onClick={() => deleteBookmark(bookmark.id)}
+                    className="bg-red-500 text-white px-3 py-1 rounded"
+                    >
+                    Delete
+                    </button>
+                </div>
+                </div>
               </div>
             ))}
           </div>
